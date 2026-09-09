@@ -40,6 +40,14 @@
     text-align: center;
   }
 
+  /* ← 変更点（「残り○件 / 全○件」の表示） */
+  .remaining-count {
+    text-align: center;
+    color: #333333;
+    font-size: 13px;
+    margin: 0 0 12px;
+  }
+
   /* タスク入力欄と追加ボタンのエリア */
   .input-area {
     display: flex;
@@ -198,12 +206,33 @@
     font-size: 13px;
     margin-top: 16px;
   }
+
+  /* ← 変更点（完了済みを一括削除するボタン） */
+  #clearCompletedBtn {
+    display: block;
+    margin: 12px auto 0;
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    color: #333333;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  #clearCompletedBtn:hover {
+    background: #f7f8fa;
+  }
 </style>
 </head>
 <body>
 
 <div class="container">
   <h1>ToDoリスト</h1>
+
+  <!-- ← 変更点（「残り○件 / 全○件」の表示） -->
+  <p class="remaining-count" id="remainingCount"></p>
 
   <!-- タスク入力欄と追加ボタン -->
   <div class="input-area">
@@ -226,6 +255,9 @@
 
   <!-- ← 変更点（完了件数 / 総件数の表示） -->
   <p class="task-count" id="taskCount"></p>
+
+  <!-- ← 変更点（完了済みを一括削除するボタン） -->
+  <button id="clearCompletedBtn">完了済みを一括削除</button>
 </div>
 
 <script>
@@ -245,6 +277,8 @@
   const taskCount = document.getElementById('taskCount'); // ← 変更点
   const filterArea = document.getElementById('filterArea'); // ← 変更点
   const searchInput = document.getElementById('searchInput'); // ← 変更点
+  const remainingCount = document.getElementById('remainingCount'); // ← 変更点
+  const clearCompletedBtn = document.getElementById('clearCompletedBtn'); // ← 変更点
 
   // 入力欄の内容をタスクとして追加する
   function addTask() {
@@ -268,6 +302,12 @@
   // タスクを削除する
   function deleteTask(id) {
     tasks = tasks.filter(t => t.id !== id);
+    render();
+  }
+
+  // ← 変更点（完了済みのタスクをまとめて削除する）
+  function clearCompleted() {
+    tasks = tasks.filter(t => !t.completed);
     render();
   }
 
@@ -300,6 +340,12 @@
     taskCount.textContent = tasks.length === 0
       ? ''
       : `${completedCount} / ${tasks.length} 件完了`;
+
+    // ← 変更点（残り件数 / 全件数を計算して表示）
+    const remaining = tasks.length - completedCount;
+    remainingCount.textContent = tasks.length === 0
+      ? ''
+      : `残り${remaining}件 / 全${tasks.length}件`;
 
     // ← 変更点（フィルターと検索を反映した一覧を取得）
     const filteredTasks = getFilteredTasks();
@@ -365,6 +411,9 @@
     searchKeyword = searchInput.value.trim();
     render();
   });
+
+  // ← 変更点（「完了済みを一括削除」ボタンのクリック処理）
+  clearCompletedBtn.addEventListener('click', clearCompleted);
 
   // 初期表示
   render();
