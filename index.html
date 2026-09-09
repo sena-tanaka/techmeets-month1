@@ -224,6 +224,18 @@
   #clearCompletedBtn:hover {
     background: #f7f8fa;
   }
+
+  /* ← 変更点（完了済みが0件のときはグレーアウトして操作不可にする） */
+  #clearCompletedBtn:disabled {
+    background: #eee;
+    color: #999;
+    border-color: #eee;
+    cursor: not-allowed;
+  }
+
+  #clearCompletedBtn:disabled:hover {
+    background: #eee;
+  }
 </style>
 </head>
 <body>
@@ -346,6 +358,9 @@
     remainingCount.textContent = tasks.length === 0
       ? ''
       : `残り${remaining}件 / 全${tasks.length}件`;
+
+    // ← 変更点（完了済みが0件のときは一括削除ボタンを無効化する）
+    clearCompletedBtn.disabled = completedCount === 0;
 
     // ← 変更点（フィルターと検索を反映した一覧を取得）
     const filteredTasks = getFilteredTasks();
