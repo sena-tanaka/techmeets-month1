@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ToDoリスト</title>
 <style>
+  /* すべての要素にボックスサイズの計算方式を指定 */
   * {
     box-sizing: border-box;
   }
 
+  /* ページ全体のレイアウトと背景 */
   body {
     margin: 0;
     min-height: 100vh;
@@ -20,6 +22,7 @@
     font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
   }
 
+  /* ToDoリスト全体を囲むカード */
   .container {
     width: 100%;
     max-width: 480px;
@@ -29,13 +32,15 @@
     padding: 32px;
   }
 
+  /* タイトル見出し */
   h1 {
     margin: 0 0 24px;
     font-size: 22px;
-    color: #333;
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
     text-align: center;
   }
 
+  /* タスク入力欄と追加ボタンのエリア */
   .input-area {
     display: flex;
     gap: 8px;
@@ -56,12 +61,13 @@
     border-color: #6c8cff;
   }
 
+  /* タスク追加ボタン */
   #addBtn {
     padding: 12px 18px;
     border: none;
     border-radius: 10px;
     background: #6c8cff;
-    color: #fff;
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
     font-size: 15px;
     cursor: pointer;
     transition: background 0.2s;
@@ -71,6 +77,55 @@
     background: #5477ff;
   }
 
+  /* ← 変更点（ここから：完了状態を絞り込むフィルターボタンのエリア） */
+  .filter-area {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .filter-btn {
+    padding: 6px 14px;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    background: #fff;
+    color: #333333;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .filter-btn:hover {
+    background: #f0f2ff;
+  }
+
+  /* 選択中のフィルターボタンの見た目 */
+  .filter-btn.active {
+    background: #6c8cff;
+    border-color: #6c8cff;
+    color: #333333;
+  }
+  /* ← 変更点（ここまで：フィルターボタンのエリア） */
+
+  /* ← 変更点（ここから：タスク名をキーワード検索する入力欄） */
+  #searchInput {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+
+  #searchInput:focus {
+    border-color: #6c8cff;
+  }
+  /* ← 変更点（ここまで：検索入力欄） */
+
+  /* タスク一覧（ul） */
   #taskList {
     list-style: none;
     margin: 0;
@@ -80,38 +135,43 @@
     gap: 10px;
   }
 
+  /* タスク1件分の行（← 変更点：カード形式に変更。Flexboxで削除ボタンを右端に配置） */
   .task-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 12px 14px;
-    background: #f7f8fa;
-    border-radius: 10px;
+    background: #ffffff; /* ← 変更点（白背景） */
+    border-radius: 8px; /* ← 変更点（角丸8px） */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); /* ← 変更点（影） */
     cursor: pointer;
     transition: background 0.15s;
   }
 
   .task-item:hover {
-    background: #eef1f6;
+    background: #f7f8fa;
   }
 
+  /* タスクのテキスト部分 */
   .task-text {
     flex: 1;
     font-size: 15px;
-    color: #333;
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
     word-break: break-all;
     margin-right: 10px;
   }
 
+  /* 完了済みタスクは打ち消し線を表示 */
   .task-item.completed .task-text {
     text-decoration: line-through;
-    color: #aaa;
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
   }
 
+  /* 削除ボタン */
   .delete-btn {
     border: none;
-    background: #ff6b6b;
-    color: #fff;
+    background: #e74c3c; /* ← 変更点（削除ボタンの背景色を赤に変更） */
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 13px;
@@ -120,19 +180,21 @@
   }
 
   .delete-btn:hover {
-    background: #ee5555;
+    background: #c0392b; /* ← 変更点（ホバー時の背景色を暗い赤に変更） */
   }
 
+  /* タスクが0件のときのメッセージ */
   .empty-message {
     text-align: center;
-    color: #aaa;
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
     font-size: 14px;
     padding: 20px 0;
   }
 
+  /* ← 変更点（完了件数 / 総件数の表示スタイル） */
   .task-count {
     text-align: center;
-    color: #888;
+    color: #333333;
     font-size: 13px;
     margin-top: 16px;
   }
@@ -143,34 +205,58 @@
 <div class="container">
   <h1>ToDoリスト</h1>
 
+  <!-- タスク入力欄と追加ボタン -->
   <div class="input-area">
     <input type="text" id="taskInput" placeholder="タスクを入力...">
     <button id="addBtn">追加</button>
   </div>
 
+  <!-- ← 変更点（完了状態で絞り込むフィルターボタン） -->
+  <div class="filter-area" id="filterArea">
+    <button class="filter-btn active" data-filter="all">すべて</button>
+    <button class="filter-btn" data-filter="active">未完了のみ</button>
+    <button class="filter-btn" data-filter="completed">完了済みのみ</button>
+  </div>
+
+  <!-- ← 変更点（タスク名をキーワードで検索する入力欄） -->
+  <input type="text" id="searchInput" placeholder="タスクをキーワードで検索...">
+
+  <!-- タスク一覧（JavaScriptから中身を生成） -->
   <ul id="taskList"></ul>
 
+  <!-- ← 変更点（完了件数 / 総件数の表示） -->
   <p class="task-count" id="taskCount"></p>
 </div>
 
 <script>
+  // タスクを配列で管理する（{ id, text, completed } の形）
   let tasks = [];
   let nextId = 1;
+
+  // ← 変更点（現在選択中の絞り込み条件："all" | "active" | "completed"）
+  let currentFilter = 'all';
+
+  // ← 変更点（検索ボックスに入力されたキーワード）
+  let searchKeyword = '';
 
   const taskInput = document.getElementById('taskInput');
   const addBtn = document.getElementById('addBtn');
   const taskList = document.getElementById('taskList');
-  const taskCount = document.getElementById('taskCount');
+  const taskCount = document.getElementById('taskCount'); // ← 変更点
+  const filterArea = document.getElementById('filterArea'); // ← 変更点
+  const searchInput = document.getElementById('searchInput'); // ← 変更点
 
+  // 入力欄の内容をタスクとして追加する
   function addTask() {
     const text = taskInput.value.trim();
-    if (text === '') return;
+    if (text === '') return; // 空欄のときは追加しない
 
     tasks.push({ id: nextId++, text: text, completed: false });
     taskInput.value = '';
     render();
   }
 
+  // タスクをクリックしたときに完了状態を切り替える
   function toggleTask(id) {
     const task = tasks.find(t => t.id === id);
     if (task) {
@@ -179,41 +265,71 @@
     }
   }
 
+  // タスクを削除する
   function deleteTask(id) {
     tasks = tasks.filter(t => t.id !== id);
     render();
   }
 
+  // ← 変更点（ここから：フィルター条件と検索キーワードで絞り込んだタスク一覧を作る）
+  function getFilteredTasks() {
+    let result = tasks;
+
+    // 完了状態での絞り込み
+    if (currentFilter === 'active') {
+      result = result.filter(t => !t.completed);
+    } else if (currentFilter === 'completed') {
+      result = result.filter(t => t.completed);
+    }
+
+    // キーワードでの絞り込み（大文字・小文字を区別しない）
+    if (searchKeyword !== '') {
+      result = result.filter(t => t.text.toLowerCase().includes(searchKeyword.toLowerCase()));
+    }
+
+    return result;
+  }
+  // ← 変更点（ここまで：絞り込み処理）
+
+  // 画面全体を現在のtasks配列の内容で再描画する
   function render() {
     taskList.innerHTML = '';
 
+    // ← 変更点（完了件数 / 総件数を計算して表示）
     const completedCount = tasks.filter(t => t.completed).length;
     taskCount.textContent = tasks.length === 0
       ? ''
       : `${completedCount} / ${tasks.length} 件完了`;
 
-    if (tasks.length === 0) {
+    // ← 変更点（フィルターと検索を反映した一覧を取得）
+    const filteredTasks = getFilteredTasks();
+
+    // 表示するタスクが1件もないときのメッセージ
+    if (filteredTasks.length === 0) {
       const empty = document.createElement('li');
       empty.className = 'empty-message';
-      empty.textContent = 'タスクがありません';
+      empty.textContent = tasks.length === 0 ? 'タスクがありません' : '該当するタスクがありません'; // ← 変更点
       taskList.appendChild(empty);
       return;
     }
 
-    tasks.forEach(task => {
+    // タスク一覧をDOMに生成する（← 変更点：tasksではなくfilteredTasksをループ）
+    filteredTasks.forEach(task => {
       const li = document.createElement('li');
       li.className = 'task-item' + (task.completed ? ' completed' : '');
 
+      // タスク名の部分（クリックで完了/未完了を切り替え）
       const span = document.createElement('span');
       span.className = 'task-text';
       span.textContent = task.text;
       span.addEventListener('click', () => toggleTask(task.id));
 
+      // 削除ボタン
       const delBtn = document.createElement('button');
       delBtn.className = 'delete-btn';
       delBtn.textContent = '削除';
       delBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
+        e.stopPropagation(); // タスク行のクリック（完了切り替え）が発火しないようにする
         deleteTask(task.id);
       });
 
@@ -223,11 +339,34 @@
     });
   }
 
+  // 追加ボタンのクリックでタスクを追加
   addBtn.addEventListener('click', addTask);
+
+  // Enterキーでもタスクを追加できるようにする
   taskInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') addTask();
   });
 
+  // ← 変更点（ここから：フィルターボタンのクリックで絞り込み条件を切り替える）
+  filterArea.addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+
+    currentFilter = btn.dataset.filter;
+    filterArea.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.toggle('active', b === btn);
+    });
+    render();
+  });
+  // ← 変更点（ここまで：フィルターボタンの処理）
+
+  // ← 変更点（検索ボックスに入力するたびに絞り込みを更新する）
+  searchInput.addEventListener('input', () => {
+    searchKeyword = searchInput.value.trim();
+    render();
+  });
+
+  // 初期表示
   render();
 </script>
 
