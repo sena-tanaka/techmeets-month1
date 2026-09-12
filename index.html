@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToDoリスト</title>
+<style>
+  /* すべての要素にボックスサイズの計算方式を指定 */
+  * {
+    box-sizing: border-box;
+  }
+
+  /* ページ全体のレイアウトと背景 */
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 60px 20px;
+    background: #f0f2f5;
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  }
+
+  /* ToDoリスト全体を囲むカード */
+  .container {
+    width: 100%;
+    max-width: 480px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 32px;
+  }
+
+  /* タイトル見出し */
+  h1 {
+    margin: 0 0 24px;
+    font-size: 22px;
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
+    text-align: center;
+  }
+
+  /* ← 変更点（「残り○件 / 全○件」の表示） */
+  .remaining-count {
+    text-align: center;
+    color: #333333;
+    font-size: 13px;
+    margin: 0 0 12px;
+  }
+
+  /* タスク入力欄と追加ボタンのエリア */
+  .input-area {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  #taskInput {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #taskInput:focus {
+    border-color: #6c8cff;
+  }
+
+  /* ← 変更点（締め切り日を設定する日付入力欄） */
+  #dueDateInput {
+    padding: 12px 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #333333;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #dueDateInput:focus {
+    border-color: #6c8cff;
+  }
+
+  /* タスク追加ボタン */
+  #addBtn {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 10px;
+    background: #6c8cff;
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  #addBtn:hover {
+    background: #5477ff;
+  }
+
+  /* ← 変更点（ここから：完了状態を絞り込むフィルターボタンのエリア） */
+  .filter-area {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .filter-btn {
+    padding: 6px 14px;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    background: #fff;
+    color: #333333;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .filter-btn:hover {
+    background: #f0f2ff;
+  }
+
+  /* 選択中のフィルターボタンの見た目 */
+  .filter-btn.active {
+    background: #6c8cff;
+    border-color: #6c8cff;
+    color: #333333;
+  }
+  /* ← 変更点（ここまで：フィルターボタンのエリア） */
+
+  /* ← 変更点（ここから：タスク名をキーワード検索する入力欄） */
+  #searchInput {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+
+  #searchInput:focus {
+    border-color: #6c8cff;
+  }
+  /* ← 変更点（ここまで：検索入力欄） */
+
+  /* タスク一覧（ul） */
+  #taskList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* タスク1件分の行（← 変更点：カード形式に変更。Flexboxで削除ボタンを右端に配置） */
+  .task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: #ffffff; /* ← 変更点（白背景） */
+    border-radius: 8px; /* ← 変更点（角丸8px） */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); /* ← 変更点（影） */
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .task-item:hover {
+    background: #f7f8fa;
+  }
+
+  /* ← 変更点（締め切りを過ぎている未完了タスクを赤くハイライト） */
+  .task-item.overdue {
+    background: #fdecea;
+  }
+
+  .task-item.overdue .task-text,
+  .task-item.overdue .task-due-date {
+    color: #c0392b;
+  }
+
+  /* タスクのテキスト部分 */
+  .task-text {
+    flex: 1;
+    font-size: 15px;
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
+    word-break: break-all;
+    margin-right: 10px;
+  }
+
+  /* 完了済みタスクは打ち消し線を表示 */
+  .task-item.completed .task-text {
+    text-decoration: line-through;
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
+  }
+
+  /* ← 変更点（タスクに設定された締め切り日の表示） */
+  .task-due-date {
+    font-size: 12px;
+    color: #333333;
+    margin-right: 10px;
+    white-space: nowrap;
+  }
+
+  /* 削除ボタン */
+  .delete-btn {
+    border: none;
+    background: #e74c3c; /* ← 変更点（削除ボタンの背景色を赤に変更） */
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .delete-btn:hover {
+    background: #c0392b; /* ← 変更点（ホバー時の背景色を暗い赤に変更） */
+  }
+
+  /* タスクが0件のときのメッセージ */
+  .empty-message {
+    text-align: center;
+    color: #333333; /* ← 変更点（文字色を#333333に統一） */
+    font-size: 14px;
+    padding: 20px 0;
+  }
+
+  /* ← 変更点（完了件数 / 総件数の表示スタイル） */
+  .task-count {
+    text-align: center;
+    color: #333333;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+
+  /* ← 変更点（完了済みを一括削除するボタン） */
+  #clearCompletedBtn {
+    display: block;
+    margin: 12px auto 0;
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    color: #333333;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  #clearCompletedBtn:hover {
+    background: #f7f8fa;
+  }
+
+  /* ← 変更点（完了済みが0件のときはグレーアウトして操作不可にする） */
+  #clearCompletedBtn:disabled {
+    background: #eee;
+    color: #999;
+    border-color: #eee;
+    cursor: not-allowed;
+  }
+
+  #clearCompletedBtn:disabled:hover {
+    background: #eee;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>ToDoリスト</h1>
+
+  <!-- ← 変更点（「残り○件 / 全○件」の表示） -->
+  <p class="remaining-count" id="remainingCount"></p>
+
+  <!-- タスク入力欄と追加ボタン -->
+  <div class="input-area">
+    <input type="text" id="taskInput" placeholder="タスクを入力...">
+    <!-- ← 変更点（締め切り日を設定する日付入力欄） -->
+    <input type="date" id="dueDateInput">
+    <button id="addBtn">追加</button>
+  </div>
+
+  <!-- ← 変更点（完了状態で絞り込むフィルターボタン） -->
+  <div class="filter-area" id="filterArea">
+    <button class="filter-btn active" data-filter="all">すべて</button>
+    <button class="filter-btn" data-filter="active">未完了のみ</button>
+    <button class="filter-btn" data-filter="completed">完了済みのみ</button>
+  </div>
+
+  <!-- ← 変更点（タスク名をキーワードで検索する入力欄） -->
+  <input type="text" id="searchInput" placeholder="タスクをキーワードで検索...">
+
+  <!-- タスク一覧（JavaScriptから中身を生成） -->
+  <ul id="taskList"></ul>
+
+  <!-- ← 変更点（完了件数 / 総件数の表示） -->
+  <p class="task-count" id="taskCount"></p>
+
+  <!-- ← 変更点（完了済みを一括削除するボタン） -->
+  <button id="clearCompletedBtn">完了済みを一括削除</button>
+</div>
+
+<script>
+  // タスクを配列で管理する（{ id, text, completed } の形）
+  let tasks = [];
+  let nextId = 1;
+
+  // ← 変更点（LocalStorageに保存する際のキー）
+  const STORAGE_KEY = 'todo-tasks';
+
+  // ← 変更点（現在のtasksとnextIdをLocalStorageへ保存する）
+  function saveTasks() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ tasks, nextId }));
+  }
+
+  // ← 変更点（LocalStorageから保存済みのタスクを読み込む）
+  function loadTasks() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
+
+    try {
+      const data = JSON.parse(saved);
+      tasks = data.tasks || [];
+      nextId = data.nextId || 1;
+    } catch (e) {
+      tasks = [];
+      nextId = 1;
+    }
+  }
+
+  // ← 変更点（現在選択中の絞り込み条件："all" | "active" | "completed"）
+  let currentFilter = 'all';
+
+  // ← 変更点（検索ボックスに入力されたキーワード）
+  let searchKeyword = '';
+
+  const taskInput = document.getElementById('taskInput');
+  const dueDateInput = document.getElementById('dueDateInput'); // ← 変更点
+  const addBtn = document.getElementById('addBtn');
+  const taskList = document.getElementById('taskList');
+  const taskCount = document.getElementById('taskCount'); // ← 変更点
+  const filterArea = document.getElementById('filterArea'); // ← 変更点
+  const searchInput = document.getElementById('searchInput'); // ← 変更点
+  const remainingCount = document.getElementById('remainingCount'); // ← 変更点
+  const clearCompletedBtn = document.getElementById('clearCompletedBtn'); // ← 変更点
+
+  // 入力欄の内容をタスクとして追加する
+  function addTask() {
+    const text = taskInput.value.trim();
+    if (text === '') return; // 空欄のときは追加しない
+
+    const dueDate = dueDateInput.value; // ← 変更点（設定された締め切り日）
+
+    tasks.push({ id: nextId++, text: text, completed: false, dueDate: dueDate });
+    taskInput.value = '';
+    dueDateInput.value = ''; // ← 変更点（追加後に日付入力欄をリセット）
+    saveTasks(); // ← 変更点（LocalStorageへ保存）
+    render();
+  }
+
+  // タスクをクリックしたときに完了状態を切り替える
+  function toggleTask(id) {
+    const task = tasks.find(t => t.id === id);
+    if (task) {
+      task.completed = !task.completed;
+      saveTasks(); // ← 変更点（LocalStorageへ保存）
+      render();
+    }
+  }
+
+  // タスクを削除する
+  function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    saveTasks(); // ← 変更点（LocalStorageへ保存）
+    render();
+  }
+
+  // ← 変更点（完了済みのタスクをまとめて削除する）
+  function clearCompleted() {
+    tasks = tasks.filter(t => !t.completed);
+    saveTasks(); // ← 変更点（LocalStorageへ保存）
+    render();
+  }
+
+  // ← 変更点（締め切り日が今日より前で、かつ未完了かどうかを判定する）
+  function isOverdue(task) {
+    if (task.completed || !task.dueDate) return false;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(task.dueDate);
+
+    return due < today;
+  }
+
+  // ← 変更点（ここから：フィルター条件と検索キーワードで絞り込んだタスク一覧を作る）
+  function getFilteredTasks() {
+    let result = tasks;
+
+    // 完了状態での絞り込み
+    if (currentFilter === 'active') {
+      result = result.filter(t => !t.completed);
+    } else if (currentFilter === 'completed') {
+      result = result.filter(t => t.completed);
+    }
+
+    // キーワードでの絞り込み（大文字・小文字を区別しない）
+    if (searchKeyword !== '') {
+      result = result.filter(t => t.text.toLowerCase().includes(searchKeyword.toLowerCase()));
+    }
+
+    return result;
+  }
+  // ← 変更点（ここまで：絞り込み処理）
+
+  // 画面全体を現在のtasks配列の内容で再描画する
+  function render() {
+    taskList.innerHTML = '';
+
+    // ← 変更点（完了件数 / 総件数を計算して表示）
+    const completedCount = tasks.filter(t => t.completed).length;
+    taskCount.textContent = tasks.length === 0
+      ? ''
+      : `${completedCount} / ${tasks.length} 件完了`;
+
+    // ← 変更点（残り件数 / 全件数を計算して表示）
+    const remaining = tasks.length - completedCount;
+    remainingCount.textContent = tasks.length === 0
+      ? ''
+      : `残り${remaining}件 / 全${tasks.length}件`;
+
+    // ← 変更点（完了済みが0件のときは一括削除ボタンを無効化する）
+    clearCompletedBtn.disabled = completedCount === 0;
+
+    // ← 変更点（フィルターと検索を反映した一覧を取得）
+    const filteredTasks = getFilteredTasks();
+
+    // 表示するタスクが1件もないときのメッセージ
+    if (filteredTasks.length === 0) {
+      const empty = document.createElement('li');
+      empty.className = 'empty-message';
+      empty.textContent = tasks.length === 0 ? 'タスクがありません' : '該当するタスクがありません'; // ← 変更点
+      taskList.appendChild(empty);
+      return;
+    }
+
+    // タスク一覧をDOMに生成する（← 変更点：tasksではなくfilteredTasksをループ）
+    filteredTasks.forEach(task => {
+      const li = document.createElement('li');
+      li.className = 'task-item'
+        + (task.completed ? ' completed' : '')
+        + (isOverdue(task) ? ' overdue' : ''); // ← 変更点（期限切れタスクをハイライト）
+
+      // タスク名の部分（クリックで完了/未完了を切り替え）
+      const span = document.createElement('span');
+      span.className = 'task-text';
+      span.textContent = task.text;
+      span.addEventListener('click', () => toggleTask(task.id));
+
+      // ← 変更点（締め切り日が設定されていれば表示する）
+      let dueDateSpan = null;
+      if (task.dueDate) {
+        dueDateSpan = document.createElement('span');
+        dueDateSpan.className = 'task-due-date';
+        dueDateSpan.textContent = '締切: ' + task.dueDate;
+      }
+
+      // 削除ボタン
+      const delBtn = document.createElement('button');
+      delBtn.className = 'delete-btn';
+      delBtn.textContent = '削除';
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // タスク行のクリック（完了切り替え）が発火しないようにする
+        deleteTask(task.id);
+      });
+
+      li.appendChild(span);
+      if (dueDateSpan) li.appendChild(dueDateSpan); // ← 変更点（締め切り日を表示）
+      li.appendChild(delBtn);
+      taskList.appendChild(li);
+    });
+  }
+
+  // 追加ボタンのクリックでタスクを追加
+  addBtn.addEventListener('click', addTask);
+
+  // Enterキーでもタスクを追加できるようにする
+  taskInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  // ← 変更点（ここから：フィルターボタンのクリックで絞り込み条件を切り替える）
+  filterArea.addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+
+    currentFilter = btn.dataset.filter;
+    filterArea.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.toggle('active', b === btn);
+    });
+    render();
+  });
+  // ← 変更点（ここまで：フィルターボタンの処理）
+
+  // ← 変更点（検索ボックスに入力するたびに絞り込みを更新する）
+  searchInput.addEventListener('input', () => {
+    searchKeyword = searchInput.value.trim();
+    render();
+  });
+
+  // ← 変更点（「完了済みを一括削除」ボタンのクリック処理）
+  clearCompletedBtn.addEventListener('click', clearCompleted);
+
+  // ← 変更点（ページを開いたときにLocalStorageから保存済みのタスクを読み込む）
+  loadTasks();
+
+  // 初期表示
+  render();
+</script>
+
+</body>
+</html>
