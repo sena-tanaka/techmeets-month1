@@ -15,8 +15,10 @@
     margin: 0;
     min-height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column; /* ← 変更点（複数セクションを縦に並べるため） */
+    justify-content: flex-start;
+    align-items: center;
+    gap: 40px; /* ← 変更点（セクション間の余白） */
     padding: 60px 20px;
     background: #f0f2f5;
     font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
@@ -269,6 +271,85 @@
   #clearCompletedBtn:disabled:hover {
     background: #eee;
   }
+
+  /* ← 変更点（ここから：好きなものまとめページセクション） */
+
+  /* まとめページ全体を囲むカード（.containerと同じデザインで統一） */
+  .favorites-container {
+    width: 100%;
+    max-width: 900px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 32px;
+  }
+
+  .favorites-container h2 {
+    margin: 0 0 24px;
+    font-size: 22px;
+    color: #333333;
+    text-align: center;
+  }
+
+  /* カードグリッド：Flexboxで横並び＆折り返し */
+  .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  /* 映画カード1枚分 */
+  .movie-card {
+    width: 220px;
+    background: #f7f8fa;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s; /* ホバーを滑らかにアニメーション */
+  }
+
+  /* ホバー時に拡大＋影を濃くする */
+  .movie-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+  }
+
+  .movie-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .movie-card-body {
+    padding: 14px;
+  }
+
+  .movie-card-body h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: #333333;
+  }
+
+  .movie-card-body p {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: #333333;
+    line-height: 1.6;
+  }
+
+  /* ジャンルバッジ */
+  .genre-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #6c8cff;
+    color: #333333;
+    font-size: 11px;
+  }
+  /* ← 変更点（ここまで：好きなものまとめページセクション） */
 </style>
 </head>
 <body>
@@ -306,6 +387,50 @@
   <!-- ← 変更点（完了済みを一括削除するボタン） -->
   <button id="clearCompletedBtn">完了済みを一括削除</button>
 </div>
+
+<!-- ← 変更点（ここから：好きな映画まとめページセクション） -->
+<div class="favorites-container">
+  <h2>好きな映画まとめ</h2>
+
+  <div class="card-container">
+    <div class="movie-card">
+      <img src="https://placehold.co/300x200?text=Interstellar" alt="インターステラー">
+      <div class="movie-card-body">
+        <h3>インターステラー</h3>
+        <p>枯れゆく地球を離れ、人類の新天地を探すため宇宙へ旅立つ父親の物語。時間と重力を扱った映像表現が圧巻。</p>
+        <span class="genre-badge">SF</span>
+      </div>
+    </div>
+
+    <div class="movie-card">
+      <img src="https://placehold.co/300x200?text=Mad+Max" alt="マッドマックス 怒りのデス・ロード">
+      <div class="movie-card-body">
+        <h3>マッドマックス 怒りのデス・ロード</h3>
+        <p>荒廃した世界を舞台に繰り広げられる一台のトラックを巡る追跡劇。カーアクションの密度が異常に高い。</p>
+        <span class="genre-badge">アクション</span>
+      </div>
+    </div>
+
+    <div class="movie-card">
+      <img src="https://placehold.co/300x200?text=Frozen" alt="アナと雪の女王">
+      <div class="movie-card-body">
+        <h3>アナと雪の女王</h3>
+        <p>凍らせる力を持つ姉と、それを追う妹の絆を描いたミュージカル映画。歌と映像美が印象的。</p>
+        <span class="genre-badge">アニメ</span>
+      </div>
+    </div>
+
+    <div class="movie-card">
+      <img src="https://placehold.co/300x200?text=Shawshank" alt="ショーシャンクの空に">
+      <div class="movie-card-body">
+        <h3>ショーシャンクの空に</h3>
+        <p>無実の罪で投獄された銀行員が、刑務所の中で希望を失わずに生き抜く姿を描いた不朽の名作。</p>
+        <span class="genre-badge">ドラマ</span>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ← 変更点（ここまで：好きな映画まとめページセクション） -->
 
 <script>
   // タスクを配列で管理する（{ id, text, completed } の形）

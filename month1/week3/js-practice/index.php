@@ -1,3 +1,3 @@
-<?php
-echo "Hello, PHP!";
-?>
+<?
+phpecho "PHPが動いています！"
+;?>
